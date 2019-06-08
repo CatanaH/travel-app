@@ -191,16 +191,21 @@ def create_trip(filename):
             ### TODO: access list item with index and display trip details
                 #Add ability to add new details or edit old ones
 
+    if vacations == None:
+        trip_list=trip
+    else:
+        try: #if list has any Nonetype objects remove them
+            trip_list=vacations
+            trip_list.append(trip)
+            for i in trip_list:
+                if i == None:
+                    trip_list.pop(trip_list.index(i))
+        except AttributeError: #if vacations is only one item, convert to list
+            trip_list=[vacations,]
+            trip_list.append(trip)
 
-
-    # try:
-    #     trip_list=vacations
-    #     trip_list.append(trip)
-    # except AttributeError:
-    #     trip_list=[vacations,]
-    #     trip_list.append(trip)
-    # print(trip_list)
-    # return trip_list
+    print(trip_list)
+    return trip_list
 
     # print(type(vacations))
 def save_trip(trip_list, filename):
@@ -210,13 +215,16 @@ def save_trip(trip_list, filename):
     to save trip obj data to be accessed at opening of program
     combine obj's into a list to be uploaded to file
     '''
-    try:
-        with open(filename, 'wb') as output:  # Overwrites any existing file.
-            pickle.dump(trip_list, output, -1)
-    except UnboundLocalError:
-        print('Cannot Save Trip, Error')
-    except:
-        print('other error')
+    if trip_list == None:
+        print("No Data to save\nCancelling operation.")
+    else:
+        try:
+            with open(filename, 'wb') as output:  # Overwrites any existing file.
+                pickle.dump(trip_list, output, -1)
+        except UnboundLocalError:
+            print('Cannot Save Trip, Error')
+        except:
+            print('other error')
     # hawaii = Trip('Hawaii','Nov 2019') #example, convert to actual data string later
     # save_trip(hawaii, 'pckl_test_file.pkl')
 
