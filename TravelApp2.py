@@ -39,6 +39,39 @@ class ReservedCost():
         self.company = company
         self.misc=misc
 
+
+    def edit_cost(self):
+        #should maybe be using a dictionary here? for printing and item assignment instead of list?
+        edit_lst=[]
+        for i in [(self.type,'type'),(self.price,'price'),(self.pay_method,'method'),(self.pointa,'pointa'),(self.start_date,'start_date'),(self.start_time,'start_time'),(self.pointb,'pointb'),(self.end_date,'end_date'),(self.end_time,'end_time'),(self.sub_type,'sub_type'),(self.conf,'conf'),(self.company,'company'),(self.misc,'misc')]:
+            print("{}={}\ttype new info or 'enter' to skip".format(i[1],i[0]))
+            edited_ans=input()
+            if edited_ans =='':
+                edit_lst.append(i[0])
+            else:
+                edit_lst.append(edited_ans)
+
+        if len(edit_lst) ==13:
+            self.type=edit_lst[0]
+            self.price=edit_lst[1]
+            self.pay_method=edit_lst[2]
+            self.pointa=edit_lst[3]
+            self.start_date=edit_lst[4]
+            self.start_time = edit_lst[5]
+            self.pointb = edit_lst[6]
+            self.end_date = edit_lst[7]
+            self.end_time = edit_lst[8]
+            self.sub_type =edit_lst[9]
+            self.conf = edit_lst[10]
+            self.company = edit_lst[11]
+            self.misc=edit_lst[12]
+            print("All updated")
+        else:
+            print("error, could not update")
+
+
+
+
     def __str__(self):
         return(("type= {}\nprice={}\npay_method={}\npointa={}\nstart_date={}\nstart_time= {}\npointb= {}\nend_date= {}\nend_time= {}\nsub_type= {}\nconf= {}\ncompany= {}\nmisc= {}").format(self.type,\
             self.price, self.pay_method, self.pointa, self.start_date,\
@@ -255,12 +288,18 @@ def create_trip(choice,vacations):
 
             elif edit_trip=='edit':
                 print("edit chosen")
+                #index will need to be fluid for reassignment
                 trip.trip_plans[0].edit_cost()
                 print(trip.trip_plans[0])
+
+            elif edit_trip=='quit':
+                print("Quit chosen, loop breaking")
+                break
             else:
                 continue
 
         for t in trip.trip_plans:
+            print('Full trip details:')
             print(t)
     # print("What type of charge is it?\nTransport, Lodging, Event\nMeal, Merchandise, Fee")
     # charge_type_full = input()
@@ -324,7 +363,13 @@ def create_trip(choice,vacations):
 
     if vacations == None:
         trip_list=trip
-    else:
+
+    elif choice == 'edit':
+        #should have prior writen logic to index trip to be edited, use same here
+        vacations[trip_num]=trip
+        trip_list=vacations
+
+    elif choice == 'new':
         try: #if list has any Nonetype objects remove them
             trip_list=vacations
             trip_list.append(trip)
@@ -334,11 +379,13 @@ def create_trip(choice,vacations):
         except AttributeError: #if vacations is only one item, convert to list
             trip_list=[vacations,]
             trip_list.append(trip)
-
+    else:
+        print('Failure adding item to vacations list\n')
+        #prob add a trip_list to avoid breaking if this clause runs
     print(trip_list)
     return trip_list  #Comment out when testing to avoid saving changes
 
-    # print(type(vacations))
+
 def save_trip(trip_list, filename):
     #I want all trips to be in one file, read/edited/saved to
     #use pop() to remove edit file, to append later
@@ -363,4 +410,3 @@ def save_trip(trip_list, filename):
 #### TODO: split into smaller chunks of functions
 
 #been working on edit field, then edit on that, then only UnreservedCost:
-    #seems to be working as an update field, now add edit_cost to ReservedCost
