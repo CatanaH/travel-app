@@ -144,17 +144,28 @@ class Trip():
 
     def add_reserved_cost(self,**kwargs):
         x = ReservedCost(**kwargs)
+        x.edit_cost()
         self.trip_plans.append(x)
-        # ny=Trip('New York')
-        # ny.add_reserved_cost(price=20,pointa='Phx,Az',pointb='NewYork,NY',sub_type='flight',company='AmericanAir',start_time='11pm')
-        # print(ny.trip_plans[0])
 
     def add_unreserved_cost(self,**kwargs):
         x = UnreservedCost(**kwargs)
+        x.edit_cost()
         self.trip_plans.append(x)
-        # ny=Trip('New York')
-        # ny.add_unreserved_cost(price=20,loc='Phx,Az',item='lunch',type='food')
-        # print(ny.trip_plans[0])
+
+    def add_cost(self):
+        print("What type of charge is it?\nTransport, Lodging, Event\nMeal, Merchandise, Fee")
+        charge_type_full = input()
+        charge_type=charge_type_full.lower()[0]
+        #add something to auto assign type to charge_type
+
+        if charge_type=='t' or charge_type=='l' or charge_type=='e':
+            self.add_reserved_cost()
+
+        elif charge_type=='meal' or charge_type=='m' or charge_type=='f':
+            self.add_unreserved_cost()
+
+        # print('\n')
+        # print(self.trip_plans[0])
 
 '''
 ####start program and read pre existing data
@@ -210,48 +221,8 @@ def create_trip(choice,vacations):
             if appr_name.lower()[0]=='y':
                 name_trip=True
 
-        print("What type of charge is it?\nTransport, Lodging, Event\nMeal, Merchandise, Fee")
-        charge_type_full = input()
-        charge_type=charge_type_full.lower()[0]
         trip = Trip(trip_dest)
-
-        if charge_type=='t' or charge_type=='l' or charge_type=='e':
-            #list of questions saved to input, final look to approve. otherwise redo
-            print("Please complete the following fields.")
-            type=charge_type#trnasport/Lodging
-            sub_type=input("What is the charge for? ")
-            price=input("Price: ")
-            pay_method=input("Payment Method: ")
-            pointa=input("Location: ")
-            start_date=input("Start Date: ")
-            start_time=input("Start Time: ")
-            pointb=input("End Location: ")
-            end_date=input("End Date: ")
-            end_time=input("End Time: ")
-            conf=input("Confirmation details: ")
-            company=input("Company/Brand: ")
-            misc=input("Misc. details: ")
-
-            trip.add_reserved_cost(type=type, price=price, pay_method=pay_method,
-                pointa=pointa, start_date=start_date, start_time=start_time,
-                pointb=pointb, end_date=end_date, end_time=end_time,
-                sub_type=sub_type, conf=conf, company=company, misc=misc)
-
-        elif charge_type=='meal' or charge_type=='m' or charge_type=='f':
-            print("Please complete the following fields.")
-            type=charge_type #transport/Lodging
-            item = input("What is the charge for? ")
-            price=input("Price: ")
-            pay_method=input("Payment Method: ")
-            loc=input("Location: ")
-            date=input("Date: ")
-            misc=input("Misc. details: ")
-
-            trip.add_unreserved_cost(type=type,price=price,item=item,
-                pay_method=pay_method,date=date,loc=loc,misc=misc)
-
-        print('\n')
-        print(trip.trip_plans[0])
+        trip.add_cost()
 
     elif choice.lower() == 'edit':
         #figure out how to edit Trip attributes
@@ -269,10 +240,15 @@ def create_trip(choice,vacations):
         trip_num=vacay_list.index(trip_choice)
         # print(trip_num)
         trip=vacations[trip_num]
+        print('\n')
         print(trip)
-        for t in trip.trip_plans:
-            print(t)
-        print("end of plans")
+        trip_plans_display = []
+        for cost in trip.trip_plans:
+            #add logic to sort type and return clearer summary of cost
+            trip_plans_display.append(cost.type)
+        for num,cost in enumerate(trip_plans_display):
+            print(str(num)+': '+cost)
+        print("end of scheduled plans\n")
         ### TODO: access list item with index and display trip details
             #Add ability to add new details or edit old ones
 
@@ -284,15 +260,26 @@ def create_trip(choice,vacations):
             if edit_trip=='add':
                 print("add chosen")
                 #must be able to create new plans on this trip, without rewriting all of the data from 'new'
-                break
+                trip.add_cost()
+
 
             elif edit_trip=='edit':
-                print("edit chosen")
+                print("\nedit chosen")
                 #index will need to be fluid for reassignment
-                trip.trip_plans[0].edit_cost()
-                print(trip.trip_plans[0])
+                while True:
+                    print('which cost would you like to edit? ')
+                    #using number choices to grab vs typed names
+                    cost_num=input('please enter the number')
+                    print(len(trip_plans_display))
+                    if int(cost_num) < len(trip_plans_display):
+                        break
+                    elif cost_num =='quit':
+                        break
+                #clean up int(cost_num) into one variable
+                trip.trip_plans[int(cost_num)].edit_cost()
+                print(trip.trip_plans[int(cost_num)])
 
-            elif edit_trip=='quit':
+            elif edit_trip=='quit' or edit_trip=='done':
                 print("Quit chosen, loop breaking")
                 break
             else:
@@ -382,7 +369,8 @@ def create_trip(choice,vacations):
     else:
         print('Failure adding item to vacations list\n')
         #prob add a trip_list to avoid breaking if this clause runs
-    print(trip_list)
+    for t in trip_list:
+        print(t)
     return trip_list  #Comment out when testing to avoid saving changes
 
 
@@ -399,6 +387,7 @@ def save_trip(trip_list, filename):
         try:
             with open(filename, 'wb') as output:  # Overwrites any existing file.
                 pickle.dump(trip_list, output, -1)
+                print('trip list officially saved')
         except UnboundLocalError:
             print('Cannot Save Trip, Error')
         except:
@@ -409,4 +398,6 @@ def save_trip(trip_list, filename):
 
 #### TODO: split into smaller chunks of functions
 
-#been working on edit field, then edit on that, then only UnreservedCost:
+#been working on edit field, then edit on that,  and being able to use inxing
+#to select the one i want edited. testing to see if working, needs some debugging and cleaning up
+#also trying to narrow down into more smaller functions to be called.
