@@ -43,7 +43,7 @@ class ReservedCost():
     def edit_cost(self):
         #should maybe be using a dictionary here? for printing and item assignment instead of list?
         edit_lst=[]
-        for i in [(self.type,'type'),(self.price,'price'),(self.pay_method,'method'),(self.pointa,'pointa'),(self.start_date,'start_date'),(self.start_time,'start_time'),(self.pointb,'pointb'),(self.end_date,'end_date'),(self.end_time,'end_time'),(self.sub_type,'sub_type'),(self.conf,'conf'),(self.company,'company'),(self.misc,'misc')]:
+        for i in [(self.type,'type'),(self.price,'price'),(self.pay_method,'payment method'),(self.pointa,'pointa'),(self.start_date,'start_date'),(self.start_time,'start_time'),(self.pointb,'pointb'),(self.end_date,'end_date'),(self.end_time,'end_time'),(self.sub_type,'sub_type'),(self.conf,'conf'),(self.company,'company'),(self.misc,'misc')]:
             print("{}={}\ttype new info or 'enter' to skip".format(i[1],i[0]))
             edited_ans=input()
             if edited_ans =='':
@@ -138,9 +138,35 @@ class Trip():
         self.destination = destination
         self.approx_date = approx_date
 
-    #set up travel plans thru the appropriate classes here
     def __str__(self):
         return self.destination + ' '+ self.approx_date
+
+    def remove_cost(self, index_place):
+        confirm = input("are you sure you want to delete this cost:\n{}\n[Y/n]".format(self.trip_plans[index_place]))
+        if confirm == 'Y':
+            self.trip_plans.pop(index_place)
+            print("trip cost has been deleted")
+        else:
+            print("action cancelled\n")
+
+    def update_trip_title(self):
+        edit_lst=[]
+        for i in [(self.destination,'destination'),(self.approx_date,'approximate date range')]:
+            print("{}={}\ttype new info or 'enter' to skip".format(i[1],i[0]))
+            edited_ans=input()
+            if edited_ans =='':
+                edit_lst.append(i[0])
+            else:
+                edit_lst.append(edited_ans)
+
+        if len(edit_lst) ==2:
+            self.destination = edit_lst[0]
+            self.approx_date = edit_lst[1]
+            print("All updated")
+        else:
+            print("error, could not update")
+
+    #set up travel plans thru the appropriate classes here
 
     def add_reserved_cost(self,**kwargs):
         x = ReservedCost(**kwargs)
@@ -172,29 +198,25 @@ class Trip():
 to open saved file or create a new one
 '''
 
-            # while choice != 'new' or choice !='edit' or choice !='quit':
-            #     choice = input("enter 'new' or 'edit' ")
-            #     if choice == 'quit':
-            #         pass
-            #     elif choice== 'new' or choice =='edit':
-
-######add clause to pop off any None types
 def load_trip_files(filename):
     with open(filename, 'rb') as f:
         vacations = pickle.load(f)
         return vacations
 
+def vacay_trips_display(vacations):
+    for num,trip in enumerate(vacations):
+        print(str(num)+'. '+trip.destination+" "+trip.approx_date)
+    print("--end of Vacations list--\n") #test line/ delete later
+
 def new_or_edit(filename):
     try:
         vacations = load_trip_files(filename)
         # print(vacations)
-        for t in vacations:
-            print(t)
-        #     print(t.destination)
-        #     for p in range(len(t.trip_plans)):
-        #         print(t.trip_plans[p])
+        vacay_trips_display(vacations)
         print("Would you like to create a new trip plan or edit an existing trip plan?")
         choice = input("enter 'new' or 'edit' ")
+        #add logic for inf input not new or edit
+        choice=choice.lower()
 
     except (FileNotFoundError,TypeError):
         print("No pre-existing trip plans file found\nPlease create a new one")
@@ -202,151 +224,126 @@ def new_or_edit(filename):
     except:
         print('Program Error, Contact Administrator')
         print(sys.exc_info()[0]) #throws other errors, using to see error print
-
+        choice=None
     finally:
-        choice=choice.lower()
         return choice,vacations
 
-def create_trip(choice,vacations):
-    #posibly use edit cost to create as well, just have attr assigned blank then reassigned as a 'change'
+charge_options = ['Transport','Lodging','Event','Meal','Merchandise','Fee']
+#possibly make charge opt a dict with keys as type and vaule list as subtype
 
-    #possibly make charge opt a dict with keys as type and vaule list as subtype
-    charge_options = ['Transport','Lodging','Event','Meal','Merchandise','Fee']
-    if choice.lower() == 'new':
-        # option to create a new Trip obj
+
+def create_new_trip():
         name_trip=None
         while name_trip==None:
             trip_dest=input("Trip Destination: ")
-            appr_name=input("Is this the correct destination? "+trip_dest)
+            appr_name=input("Is this the correct destination? "+trip_dest+" ")
             if appr_name.lower()[0]=='y':
                 name_trip=True
+            approx_date=input("trip date")
 
-        trip = Trip(trip_dest)
-        trip.add_cost()
+        trip = Trip(trip_dest,approx_date) #creating a trip object with new name
+        # trip.add_cost()
+        #when creating new trip, nedd to loop options at end to add more at one time
 
-    elif choice.lower() == 'edit':
-        #figure out how to edit Trip attributes
-        print('What trip would you like to edit? ')
-        vacay_list=[]
-        for v in vacations:
-            #change this so you pull directly from vacations, not a new list of just names
-            vacay_list.append(v.destination)
-        print(vacay_list)
-        trip_choice=None
-        while trip_choice not in vacay_list:
-            print('Please select a trip to edit')
-            trip_choice=input()
-        # print(trip_choice)
-        trip_num=vacay_list.index(trip_choice)
-        # print(trip_num)
+        return trip
+
+def create_edit_trip(choice,vacations):
+    if choice.lower() == 'edit':
+        vacay_trips_display(vacations)
+        print('which trip would you like to open? ')
+
+        while True:
+            trip_num=input('please enter the number') #using number choices to grab vs typed names
+            try:
+                trip_num=int(trip_num)
+                if trip_num < len(vacations):
+                    break
+            except:
+                if trip_num =='quit':
+                    break
+
+        if trip_num =='quit':
+            return None
+
         trip=vacations[trip_num]
         print('\n')
         print(trip)
-        trip_plans_display = []
-        for cost in trip.trip_plans:
-            #add logic to sort type and return clearer summary of cost
-            trip_plans_display.append(cost.type)
-        for num,cost in enumerate(trip_plans_display):
-            print(str(num)+': '+cost)
-        print("end of scheduled plans\n")
-        ### TODO: access list item with index and display trip details
-            #Add ability to add new details or edit old ones
+        def trip_plans_display(trip):
+            for num,cost in enumerate(trip.trip_plans):
+                print(str(num)+': '+cost.type)
+            print("end of scheduled plans\n")
 
-        charge_options = ['Transport','Lodging','Event','Meal','Merchandise','Fee']
-#################
+        trip_plans_display(trip) #summary to help make descision
         while True:
-            edit_trip=input("would you like to add a new detail or edit an existing one?")
+            edit_trip=input("Details: view, add, edit, delete cost, renametrip, delete trip, quit/done")
 
             if edit_trip=='add':
                 print("add chosen")
-                #must be able to create new plans on this trip, without rewriting all of the data from 'new'
                 trip.add_cost()
+                print(trip.trip_plans[-1]) #prints most recently added detail
 
-
-            elif edit_trip=='edit':
-                print("\nedit chosen")
-                #index will need to be fluid for reassignment
-                while True:
-                    print('which cost would you like to edit? ')
-                    #using number choices to grab vs typed names
-                    cost_num=input('please enter the number')
-                    print(len(trip_plans_display))
-                    if int(cost_num) < len(trip_plans_display):
-                        break
-                    elif cost_num =='quit':
-                        break
-                #clean up int(cost_num) into one variable
-                trip.trip_plans[int(cost_num)].edit_cost()
-                print(trip.trip_plans[int(cost_num)])
+            elif edit_trip.lower()[0]=='r':
+                trip.update_trip_title()
+                print(trip)
 
             elif edit_trip=='quit' or edit_trip=='done':
                 print("Quit chosen, loop breaking")
                 break
+
+
+            elif edit_trip == 'delete trip':
+                    print(trip)
+                    trip_plans_display(trip)
+                    confirm=input("are you sure you want to delete this entire trip? [Y/n]")
+                    if confirm=='Y':
+                        vacations.pop(trip_num)
+                        print("trip removed from vacation database")
+                        return vacations
+                    else:
+                        print("action cancelled")
+
+
+
             else:
-                continue
+                trip_plans_display(trip)
+                print("end of nested function") #just for testing/ delete later
+                print('which cost would you like to {}? '.format(edit_trip))
 
-        for t in trip.trip_plans:
-            print('Full trip details:')
+                while True:
+                    cost_num=input('please enter the number') #using number choices to grab vs typed names
+                    #clean up int(cost_num) into one variable?
+                    #have to fix so int() doesnt break str
+                    try:
+                        cost_num=int(cost_num)
+                        if int(cost_num) < len(trip.trip_plans):
+                            break
+                    except:
+                        if cost_num =='quit' or cost_num=='done':
+                            edit_trip='quit'#doesnt actually quit, just continues loop to then quit
+                            #sloppy exit but isnt breaking, find better way if possible
+                            break
+
+                if edit_trip=='edit':
+                    print("\nedit chosen")
+                    trip.trip_plans[int(cost_num)].edit_cost()
+                    print(trip.trip_plans[int(cost_num)])
+
+                elif edit_trip =='view':
+                    print(trip.trip_plans[int(cost_num)])
+                elif edit_trip=="delete cost":
+                    trip.remove_cost(int(cost_num))
+
+
+        print('Full trip details:')
+        for t in trip.trip_plans: #print full summary after
             print(t)
-    # print("What type of charge is it?\nTransport, Lodging, Event\nMeal, Merchandise, Fee")
-    # charge_type_full = input()
-    # charge_type=charge_type_full.lower()[0]
-    # trip = Trip(trip_dest)
-    #
-    # if charge_type=='t' or charge_type=='l' or charge_type=='e':
-    #     #list of questions saved to input, final look to approve. otherwise redo
-    #     print("Please complete the following fields.")
-    #     type=charge_type#trnasport/Lodging
-    #     sub_type=input("What is the charge for? ")
-    #     price=input("Price: ")
-    #     pay_method=input("Payment Method: ")
-    #     pointa=input("Location: ")
-    #     start_date=input("Start Date: ")
-    #     start_time=input("Start Time: ")
-    #     pointb=input("End Location: ")
-    #     end_date=input("End Date: ")
-    #     end_time=input("End Time: ")
-    #     conf=input("Confirmation details: ")
-    #     company=input("Company/Brand: ")
-    #     misc=input("Misc. details: ")
-    #
-    #     trip.add_reserved_cost(type=type, price=price, pay_method=pay_method,
-    #         pointa=pointa, start_date=start_date, start_time=start_time,
-    #         pointb=pointb, end_date=end_date, end_time=end_time,
-    #         sub_type=sub_type, conf=conf, company=company, misc=misc)
-    #
-    # elif charge_type=='meal' or charge_type=='merch' or charge_type=='fee':
-    #     print("Please complete the following fields.")
-    #     type=charge_type #transport/Lodging
-    #     item = input("What is the charge for? ")
-    #     price=input("Price: ")
-    #     pay_method=input("Payment Method: ")
-    #     loc=input("Location: ")
-    #     date=input("Date: ")
-    #     misc=input("Misc. details: ")
-    #
-    #     trip.add_unreserved_cost(type=type,price=price,item=item,
-    #         pay_method=pay_method,date=date,loc=loc,misc=misc)
-    #
-    # print('\n')
-    # print(trip.trip_plans[0])
+        print("end of full trip summary\n")
+
+    return (trip,trip_num)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-######this is for saving trip, must first fix 'edit' to access trip obj to save
-        #add clause to preven duplicate saves, but to overwrite instead
+###### this is for saving trip
+def create_vacaylist_for_save(vacations,trip,choice,trip_num=None):
 
     if vacations == None:
         trip_list=trip
@@ -366,20 +363,23 @@ def create_trip(choice,vacations):
         except AttributeError: #if vacations is only one item, convert to list
             trip_list=[vacations,]
             trip_list.append(trip)
+
+    elif choice == 'quit' or choice == 'done':
+        return None
+
     else:
         print('Failure adding item to vacations list\n')
-        #prob add a trip_list to avoid breaking if this clause runs
-    for t in trip_list:
-        print(t)
+        return None #to avoid breaking if this clause runs
+
+    vacay_trips_display(trip_list)
     return trip_list  #Comment out when testing to avoid saving changes
 
 
-def save_trip(trip_list, filename):
-    #I want all trips to be in one file, read/edited/saved to
-    #use pop() to remove edit file, to append later
+def save_trip_list(trip_list, filename):
     '''
     to save trip obj data to be accessed at opening of program
     combine obj's into a list to be uploaded to file
+    #I want all trips to be in one file, read/edited/saved to
     '''
     if trip_list == None:
         print("No Data to save\nCancelling operation.")
@@ -392,12 +392,14 @@ def save_trip(trip_list, filename):
             print('Cannot Save Trip, Error')
         except:
             print('other error')
-    # hawaii = Trip('Hawaii','Nov 2019') #example, convert to actual data string later
-    # save_trip(hawaii, 'pckl_test_file.pkl')
 
 
 #### TODO: split into smaller chunks of functions
 
-#been working on edit field, then edit on that,  and being able to use inxing
-#to select the one i want edited. testing to see if working, needs some debugging and cleaning up
-#also trying to narrow down into more smaller functions to be called.
+#add logic to customize class per charge type
+
+## ?whole containing loop looking for any inputs that say quit? to end program immediatly?
+# set up count for tracking costs total
+
+
+## added tuple unpacking on line 19 of _run to then feed into next function, but having problem with it returning a NOnetype when 'quit' i think line 289ish
