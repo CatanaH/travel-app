@@ -1,14 +1,14 @@
 import pickle
 '''
-travel app, flight, housing, entertainment, transport, food, merch.
+travel app; 'Transport','Lodging','Event','Meal','Merchandise','Fee'
 use classes to sort and organize and call data as needed
 
-#organizes on calendar, shows what has not been booked for dates, ex. no hotel wednesday night
+
 
 enter ahead of time:
 flight:price, datetime,airline, airports, conf# seat#?
-housing: price, dates, location, conf#
 transport: price, dates, company, pickup/dropoff, conf#
+housing: price, dates, location, conf#
 entertainment: event, price, datetime, conf#, location
 
 track as u go:
