@@ -12,7 +12,7 @@ the user will be able to:
   <li>delete cost items</li>
   <li>edit cost items</li>
   <li>View a trips total plans</li>
-  <li>View daily items</li> #TODO
+  <li>#TODO:View daily items</li>
 </ol>
 costs for trip include:
 <ul>
@@ -26,5 +26,5 @@ costs for trip include:
 
 
 <h4>My goal with this program:</h4>
-<p>make a working tracker that saves data for later viewing, track a trips running total.
-TODO: when provided the date can return the next schedualed item on the planner</p>
+<p>make a working tracker that saves data for later viewing, track a trips running total.</p>
+<p>TODO: when provided the date can return the next schedualed item on the planner</p>
