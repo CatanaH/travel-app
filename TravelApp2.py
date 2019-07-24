@@ -45,6 +45,7 @@ class ReservedCost():
 
     def edit_cost(self):
         #should maybe be using a dictionary here? for printing and item assignment instead of list?
+        #use something like:  self.entries[next_index] and create a new list for self. entries that accesses the right attributes
         edit_lst=[]
         for i in [(self.type,'type'),(self.sub_type,'sub_type'),(self.price,'price'),(self.pay_method,'payment method'),(self.pointa,'pointa'),(self.start_date,'start date mm/dd/yy'),(self.start_time,'start time'),(self.pointb,'pointb'),(self.end_date,'end date mm/dd/yy'),(self.end_time,'end_time'),(self.conf,'conf'),(self.company,'company'),(self.misc,'misc')]:
             print("{}={}\ttype new info or 'enter' to skip".format(i[1],i[0]))
